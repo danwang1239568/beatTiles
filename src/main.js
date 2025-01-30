@@ -24,20 +24,51 @@ if(window.innerHeight > window.innerWidth){
   }
 }
 
+// 加载页面
+const loadingScene = {
+  key: 'loadingScene',
+  preload(){
+    // 竖屏设备旋转
+    if (window.innerHeight > window.innerWidth) {
+      [gameWidth, gameHeight] = [gameHeight, gameWidth]
+      this.cameras.main.rotation = Phaser.Math.DegToRad(90)
+      this.cameras.main.x = gameHeight * -0.77
+      this.cameras.main.width *= 1.75
+    }
 
-const scene1 = {
-  preload() {
+    // 加载进度条
+    const gra = this.add.graphics()
+    gra.fillStyle(0xffffff, 1)
+    this.load.on('progress', (val) => {
+      gra.fillRect(gameWidth*val, gameHeight*0.7, 10, 10)
+    })
+
+    // 加载
+    this.add.text(gameWidth*0.5, gameHeight*0.6, 'loading...', {
+      fontSize: gameHeight*0.05+'px'
+    }).setOrigin(0.5, 0.5)
     this.load.image('keyImg', '/pic/keyImg.png')
     this.load.image('background', '/pic/background.jpg')
     this.load.image('star', '/pic/star.png')
+    piano88.forEach(item => {
+      this.load.audio(item.note, item.path)
+    });
+  },
+  create(){
+    this.scene.start('gamePlaceScene')
+  }
+}
+
+const gamePlaceScene = {
+  key: 'gamePlaceScene',
+  preload(){
   },
   create() {
     // 竖屏设备旋转
       if (window.innerHeight > window.innerWidth) {
-        [gameWidth, gameHeight] = [gameHeight, gameWidth]
         this.cameras.main.rotation = Phaser.Math.DegToRad(90)
         this.cameras.main.x = gameHeight * -0.77
-        this.cameras.main.width *= 1.75
+        this.cameras.main.width *= 1.76
       }
 
     // 背景图
@@ -72,6 +103,8 @@ const scene1 = {
     // 递归播放音频
     let key;
     const keys = ['d', 'f', 'j', 'k'];
+    const gra5 = this.add.graphics() // 用于绘制顶部进度条
+    gra5.fillStyle(0x44ff55, 1)
     const keyPositions = [gameWidth*2/8, gameWidth*3/8, gameWidth*4/8, gameWidth*5/8];
     const next = (i) => {
       if (!currentMusic.musics[i]) return;
@@ -113,14 +146,17 @@ const scene1 = {
           })
         });
 
-
         // 播放音效
-        let audio = new Audio(piano88[currentMusic.musics[i].key]);
-        setTimeout(() => {
-          audio.load();
-          audio.play();
-        }, gameHeight / key.body.speed * 900);
+        const src = piano88.find(item => {
+          return item.note === currentMusic.musics[i].key
+        }).path
+        const audio = this.sound.add(currentMusic.musics[i].key, src)
+        this.time.delayedCall(gameHeight / key.body.speed * 900, () => audio.play())
       }
+
+      // 顶部歌曲进度条
+      gra5.fillRect(gameWidth*i/currentMusic.musics.length, 0, 10, gameHeight/60)
+
 
       // 递归调用生成下一个音符
       setTimeout(() => next(i + 1), timeLength);
@@ -159,7 +195,7 @@ const scene1 = {
 const config = {
   width: gameWidth,
   height: gameHeight,
-  scene: scene1,
+  scene: [loadingScene, gamePlaceScene],
   backgroundColor: '#99b',
   physics: {
     default: 'arcade',
