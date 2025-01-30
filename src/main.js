@@ -1,6 +1,9 @@
 import Phaser from "phaser"
 import piano88 from '../assets/piano88.json'
 import currentMusic from '../assets/musics/千本樱.json'
+import '/pic/keyImg.png'
+import '/pic/background.jpg'
+import '/pic/star.png'
 
 // 计算全局游戏宽高
 if(window.innerHeight > window.innerWidth){
@@ -24,9 +27,9 @@ if(window.innerHeight > window.innerWidth){
 
 const scene1 = {
   preload() {
-    this.load.image('keyImg', '../assets/pic/keyImg.png')
-    this.load.image('background', '../assets/pic/background.jpg')
-    this.load.image('star', '../assets/pic/star.png')
+    this.load.image('keyImg', '/pic/keyImg.png')
+    this.load.image('background', '/pic/background.jpg')
+    this.load.image('star', '/pic/star.png')
   },
   create() {
     // 竖屏设备旋转
@@ -161,7 +164,7 @@ const config = {
   physics: {
     default: 'arcade',
     arcade: {
-      debug: true
+      debug: false
     }
   }
 }
