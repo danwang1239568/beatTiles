@@ -3,14 +3,24 @@ import piano88 from '../assets/piano88.json'
 import currentMusic from '../assets/musics/千本樱.json'
 
 // 计算全局游戏宽高
-if(innerWidth / innerHeight >= 16 / 9){
-  var gameHeight = innerHeight * 0.98
-  var gameWidth = gameHeight * 16 / 9
+if(window.innerHeight > window.innerWidth){
+  if(innerHeight / innerWidth >= 16 / 9){
+    var gameWidth = innerWidth
+    var gameHeight = gameWidth * 16 / 9
+  } else {
+    var gameHeight = innerHeight * 0.98
+    var gameWidth = gameHeight * 9 / 16
+  }
 } else {
-  var gameWidth = innerWidth
-  var gameHeight = gameWidth * 9 / 16
+  if(innerWidth / innerHeight >= 16 / 9){
+    var gameHeight = innerHeight * 0.98
+    var gameWidth = gameHeight * 16 / 9
+  } else {
+    var gameWidth = innerWidth
+    var gameHeight = gameWidth * 9 / 16
+  }
 }
-console.log(gameWidth, gameHeight);
+
 
 const scene1 = {
   preload() {
@@ -19,8 +29,16 @@ const scene1 = {
     this.load.image('star', '../assets/pic/star.png')
   },
   create() {
+    // 竖屏设备旋转
+      if (window.innerHeight > window.innerWidth) {
+        [gameWidth, gameHeight] = [gameHeight, gameWidth]
+        this.cameras.main.rotation = Phaser.Math.DegToRad(90)
+        this.cameras.main.x = gameHeight * -0.77
+        this.cameras.main.width *= 1.75
+      }
+
     // 背景图
-    this.add.image(0, 0, 'background').setOrigin(0).setScale(gameWidth/1280)
+    this.add.image(0, 0, 'background').setOrigin(0, 0).setScale(gameWidth/1280)
     const gra4 = this.add.graphics()
     gra4.fillStyle(0x111111, 0.4)
     gra4.fillRect(0, 0, gameWidth, gameHeight)
@@ -98,7 +116,7 @@ const scene1 = {
         setTimeout(() => {
           audio.load();
           audio.play();
-        }, this.cameras.main.height / key.body.speed * 900);
+        }, gameHeight / key.body.speed * 900);
       }
 
       // 递归调用生成下一个音符
