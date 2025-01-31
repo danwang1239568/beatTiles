@@ -30,7 +30,7 @@ const loadingScene = {
   preload(){
     // 竖屏设备旋转
     if (window.innerHeight > window.innerWidth) {
-      [gameWidth, gameHeight] = [gameHeight, gameWidth]
+      [gameWidth, gameHeight] = [gameHeight*0.98, gameWidth*0.9]
       this.cameras.main.rotation = Phaser.Math.DegToRad(90)
       this.cameras.main.x = gameHeight * -0.77
       this.cameras.main.width *= 1.75
@@ -67,8 +67,8 @@ const gamePlaceScene = {
     // 竖屏设备旋转
       if (window.innerHeight > window.innerWidth) {
         this.cameras.main.rotation = Phaser.Math.DegToRad(90)
-        this.cameras.main.x = gameHeight * -0.77
-        this.cameras.main.width *= 1.76
+        this.cameras.main.x = gameHeight * -0.96
+        this.cameras.main.width *= 1.8
       }
 
     // 背景图
@@ -91,7 +91,7 @@ const gamePlaceScene = {
     gra2.fillRect(0, 0, gameWidth/2, gameHeight/22.5)
     gra2.generateTexture('decision', gameWidth/2, gameHeight/22.5)
     const decision = this.physics.add.sprite(gameWidth*0.25, gameHeight*0.95, 'decision')
-    decision.setOrigin(0, 0).setSize(gameWidth*0.5, gameHeight/9)
+    decision.setOrigin(0, 0).setSize(gameWidth*0.5, gameHeight/8)
     gra2.clear()
 
     // 分数
@@ -103,11 +103,20 @@ const gamePlaceScene = {
     // 递归播放音频
     let key;
     const keys = ['d', 'f', 'j', 'k'];
-    const gra5 = this.add.graphics() // 用于绘制顶部进度条
-    gra5.fillStyle(0x44ff55, 1)
+    let gra3 = this.add.graphics() // 开始按钮
+    gra3.fillStyle(0x99eeee, 0.6)
+    this.gra5 = this.add.graphics() // 用于绘制顶部进度条
+    this.gra5.fillStyle(0x44ff55, 1)
     const keyPositions = [gameWidth*2/8, gameWidth*3/8, gameWidth*4/8, gameWidth*5/8];
     const next = (i) => {
-      if (!currentMusic.musics[i]) return;
+      if (!currentMusic.musics[i]){
+        gra3 = this.add.graphics()
+        gra3.fillStyle(0x99eeee, 0.6)
+        gra3.fillRect(gameWidth*0.8125, gameHeight*0.7, gameWidth*0.125, gameHeight*0.1)
+        startText.setAlpha(1).setDepth(100)
+        this.gra5.clear()
+        return;
+      }
       let timeLength = currentMusic.musics[i].length * 60 / currentMusic.bpm * 1000;
 
       // 判断是否为空拍
@@ -115,9 +124,9 @@ const gamePlaceScene = {
         let currentX = Phaser.Math.Between(0, 3);
         key = this.physics.add.sprite(keyPositions[currentX], 0, 'keyImg')
           .setScale(gameWidth*0.0019, gameHeight*0.0006)
-          .setSize(gameWidth*0.0625, gameHeight*0.15)
+          .setSize(gameWidth*0.0625, gameHeight*0.45)
           .setOrigin(0, 0)
-          .setVelocityY(gameHeight)
+          .setVelocityY(gameHeight*0.98)
           .setInteractive()
 
         // 生成粒子
@@ -155,7 +164,8 @@ const gamePlaceScene = {
       }
 
       // 顶部歌曲进度条
-      gra5.fillRect(gameWidth*i/currentMusic.musics.length, 0, 10, gameHeight/60)
+      this.gra5.fillStyle(0x44ff55, 1)
+      this.gra5.fillRect(gameWidth*(i-1)/currentMusic.musics.length, 0, gameWidth/currentMusic.musics.length*2, gameHeight/60)
 
 
       // 递归调用生成下一个音符
@@ -163,12 +173,11 @@ const gamePlaceScene = {
     };
 
     // 开始按钮
-    const gra3 = this.add.graphics()
-    gra3.fillStyle(0x99eeee, 0.6)
     gra3.fillRect(gameWidth*0.8125, gameHeight*0.7, gameWidth*0.125, gameHeight*0.1)
     const startText = this.add.text(gameWidth*0.82, gameHeight*0.72, 'start!', {
       fontSize: gameWidth*0.03+'px', color: '#559', fontStyle: 'bold'
     }).setInteractive().on('pointerdown', () => {
+      this.score = 0
       next(0)
       startText.setAlpha(0)
       scoreText.setAlpha(1)
